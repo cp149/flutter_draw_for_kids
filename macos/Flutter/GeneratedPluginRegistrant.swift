@@ -5,16 +5,14 @@
 import FlutterMacOS
 import Foundation
 
-import audio_service
-import audio_session
-import just_audio
+import assets_audio_player
+import assets_audio_player_web
 import path_provider_macos
 import sqflite
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  AudioServicePlugin.register(with: registry.registrar(forPlugin: "AudioServicePlugin"))
-  AudioSessionPlugin.register(with: registry.registrar(forPlugin: "AudioSessionPlugin"))
-  JustAudioPlugin.register(with: registry.registrar(forPlugin: "JustAudioPlugin"))
+  AssetsAudioPlayerPlugin.register(with: registry.registrar(forPlugin: "AssetsAudioPlayerPlugin"))
+  AssetsAudioPlayerWebPlugin.register(with: registry.registrar(forPlugin: "AssetsAudioPlayerWebPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
 }

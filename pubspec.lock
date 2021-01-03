@@ -29,6 +29,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.0"
+  assets_audio_player:
+    dependency: "direct main"
+    description:
+      name: assets_audio_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.13+1"
+  assets_audio_player_web:
+    dependency: transitive
+    description:
+      name: assets_audio_player_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.13+1"
   async:
     dependency: transitive
     description:
@@ -36,20 +50,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.5.0-nullsafety.3"
-  audio_service:
-    dependency: "direct main"
-    description:
-      name: audio_service
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.16.0"
-  audio_session:
-    dependency: transitive
-    description:
-      name: audio_session
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.10"
   boolean_selector:
     dependency: transitive
     description:
@@ -186,13 +186,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_isolate:
-    dependency: transitive
-    description:
-      name: flutter_isolate
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0+14"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -269,13 +262,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.2"
-  just_audio:
-    dependency: "direct main"
-    description:
-      name: just_audio
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.2"
   logging:
     dependency: transitive
     description:
