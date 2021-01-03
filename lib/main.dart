@@ -5,6 +5,7 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:draw_kids/upcoming_event_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_audio_desktop/flutter_audio_desktop.dart';
 import 'package:flutter_draw/flutter_draw.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -52,10 +53,19 @@ class _DrawExampleState extends State<DrawExample> {
   @override
   void initState() {
     super.initState();
-    final assetsAudioPlayer = AssetsAudioPlayer();
+    if( Platform.isWindows || Platform.isLinux){
+      // Start AudioPlayer and provide int for id.
+      var audioPlayer = new AudioPlayer(id: 0);
 
-    assetsAudioPlayer.open(Audio("asserts/music/2.mp3"),
-        loopMode: LoopMode.playlist);
+// Load audio file
+      audioPlayer.load("asserts/music/2.mp3").then((value) => audioPlayer.play());
+
+    }else {
+      final assetsAudioPlayer = AssetsAudioPlayer();
+
+      assetsAudioPlayer.open(Audio("asserts/music/2.mp3"),
+          loopMode: LoopMode.playlist);
+    }
   }
 
   @override

@@ -17,15 +17,14 @@ class UpComingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width * 0.8;
     return Container(
-      width: width,
+
       margin: const EdgeInsets.only(right: 12),
       child: Column(
         children: <Widget>[
           Expanded(child: buildImage()),
-          UIHelper.verticalSpace(24),
-          buildEventInfo(context),
+          // UIHelper.verticalSpace(24),
+          // buildEventInfo(context),
         ],
       ),
     );
