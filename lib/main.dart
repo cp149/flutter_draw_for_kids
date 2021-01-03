@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:draw_kids/upcoming_event_card.dart';
+import 'package:draw_kids/ImageCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_audio_desktop/flutter_audio_desktop.dart';
@@ -142,7 +142,7 @@ class _DrawExampleState extends State<DrawExample> {
                     scrollDirection: Axis.horizontal,
                     itemBuilder: (context, index) {
                       final event = hotList[index];
-                      return UpComingEventCard(event,
+                      return ImageCard(event,
                           onTap: () => getDrawing(event));
                     },
                   ),
