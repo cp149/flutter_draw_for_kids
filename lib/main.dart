@@ -1,16 +1,22 @@
-
-
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:draw_kids/upcoming_event_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_draw/flutter_draw.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'UIHelper.dart';
+
+const headerStyle =
+    TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold);
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -39,8 +45,8 @@ class DrawExample extends StatefulWidget {
 }
 
 class _DrawExampleState extends State<DrawExample> {
-
   File _drawImage;
+  List<String> hotList = null;
 
   @override
   Widget build(BuildContext context) {
@@ -52,32 +58,111 @@ class _DrawExampleState extends State<DrawExample> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _drawImage != null ? Image.file(_drawImage) : Container(),
-              RaisedButton(
-                onPressed: (){
-                  getDrawing();
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-                },
-                child: Text("Draw"),
-              )
-            ],),
+              buildUpComingEventList(),
+              _drawImage != null
+                  ? Image.file(_drawImage, fit: BoxFit.fill)
+                  : Container(),
+              // RaisedButton(
+              //   onPressed: (){
+              //     getDrawing();
+              //     // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+              //   },
+              //   child: Text("Draw"),
+              // )
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Future<void> getDrawing()  {
-    final getDraw =   Navigator.push(context, MaterialPageRoute(
-        builder: (context){
-          return HomePage();
-        }
-    )).then((getDraw){
-      if(getDraw != null){
+  Widget buildUpComingEventList() {
+    Future _initImages() async {
+      // >> To get paths you need these 2 lines
+      try {
+        final manifestContent = await DefaultAssetBundle.of(context)
+            .loadString('AssetManifest.json');
+
+        final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+        // >> To get paths you need these 2 lines
+
+        final imagePaths = manifestMap.keys
+            .where((String key) => key.contains('asserts/'))
+            //.where((String key) => key.contains('.jpg'))
+            .toList();
         setState(() {
-          _drawImage =  getDraw;
+          hotList = imagePaths;
+        });
+      } catch (er) {
+        print(er);
+      }
+    }
+
+    return FutureBuilder(
+      // Initialize FlutterFire:
+      future: _initImages(),
+      builder: (context, snapshot) {
+        // Check for errors
+
+        // Once complete, show your application
+        if (hotList != null) {
+          return Container(
+            padding: const EdgeInsets.only(left: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Practising",
+                    style: headerStyle.copyWith(color: Colors.white)),
+                UIHelper.verticalSpace(16),
+                Container(
+                  height: 250,
+                  child: ListView.builder(
+                    itemCount: hotList.length,
+                    physics: BouncingScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final event = hotList[index];
+                      return UpComingEventCard(event,
+                          onTap: () => getDrawing(event));
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        // Otherwise, show something whilst waiting for initialization to complete
+        return CircularProgressIndicator();
+      },
+    );
+  }
+
+  Future<File> getImageFileFromAssets(String path) async {
+    final byteData = await rootBundle.load('$path');
+    final file = File('${(await getTemporaryDirectory()).path}/$path');
+    file.create(recursive: true).then((val) async {
+      if (await val.exists()) {
+        await file.writeAsBytesSync(byteData.buffer
+            .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+      }
+    });
+    // await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    return file;
+  }
+
+  Future<void> getDrawing(img) async {
+    setImageFile(await getImageFileFromAssets(img));
+    final getDraw =
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return HomePage();
+    })).then((getDraw) {
+      if (getDraw != null) {
+        setState(() {
+          _drawImage = getDraw;
         });
       }
-    }).catchError((er){print(er);});
-
+    }).catchError((er) {
+      print(er);
+    });
   }
 }
