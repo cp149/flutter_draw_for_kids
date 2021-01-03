@@ -8,8 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_audio_desktop/flutter_audio_desktop.dart';
 import 'package:flutter_draw/flutter_draw.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:filesystem_picker/filesystem_picker.dart';
 import 'UIHelper.dart';
+import 'package:path/path.dart' as p;
 
 const headerStyle =
     TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold);
@@ -53,19 +55,31 @@ class _DrawExampleState extends State<DrawExample> {
   @override
   void initState() {
     super.initState();
-    if( Platform.isWindows || Platform.isLinux){
-      // Start AudioPlayer and provide int for id.
-      var audioPlayer = new AudioPlayer(id: 0);
+    loadMp3();
 
-// Load audio file
-      audioPlayer.load("asserts/music/2.mp3").then((value) => audioPlayer.play());
+  }
+  Future<void> loadMp3() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Try reading data from the counter key. If it doesn't exist, return null.
+    var imagePath = prefs.getString("back_image");
+    final file=File(imagePath + "/music/2.mp3");
+    file.exists().then((value)  {
+        if (Platform.isWindows || Platform.isLinux) {
+          // Start AudioPlayer and provide int for id.
+          var audioPlayer = new AudioPlayer(id: 0);
 
-    }else {
-      final assetsAudioPlayer = AssetsAudioPlayer();
+          // Load audio file
+          audioPlayer.load(file.path).then((value) =>
+              audioPlayer.play());
+        } else {
+          final assetsAudioPlayer = AssetsAudioPlayer();
 
-      assetsAudioPlayer.open(Audio("asserts/music/2.mp3"),
-          loopMode: LoopMode.playlist);
-    }
+          assetsAudioPlayer.open(Audio(file.path),
+              loopMode: LoopMode.playlist);
+        }
+      }
+    );
+
   }
 
   @override
@@ -78,17 +92,10 @@ class _DrawExampleState extends State<DrawExample> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              buildUpComingEventList(),
+              buildBackImageList(),
               _drawImage != null
                   ? Image.file(_drawImage, fit: BoxFit.fill)
                   : Container(),
-              // RaisedButton(
-              //   onPressed: (){
-              //     getDrawing();
-              //     // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-              //   },
-              //   child: Text("Draw"),
-              // )
             ],
           ),
         ),
@@ -96,21 +103,37 @@ class _DrawExampleState extends State<DrawExample> {
     );
   }
 
-  Widget buildUpComingEventList() {
+  Widget buildBackImageList() {
     Future _initImages() async {
-      // >> To get paths you need these 2 lines
       try {
-        final manifestContent = await DefaultAssetBundle.of(context)
-            .loadString('AssetManifest.json');
-
-        final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-        // >> To get paths you need these 2 lines
-
-        final imagePaths = manifestMap.keys
-            .where((String key) => key.contains('asserts/'))
-            //.where((String key) => key.contains('.jpg'))
-            .toList();
-        setState(() {
+        final prefs = await SharedPreferences.getInstance();
+        // Try reading data from the counter key. If it doesn't exist, return null.
+        var imagePath = prefs.getString("back_image");
+        final fileExist =await Directory(imagePath).exists();
+        if (imagePath ==null || fileExist==false) {
+          imagePath = await FilesystemPicker.open(
+            title: 'load from folder',
+            context: context,
+            rootDirectory: Directory.current,
+            fsType: FilesystemType.folder,
+            pickText: 'load images from this folder',
+            folderIconColor: Colors.teal,
+          );
+          prefs.setString("back_image",imagePath);
+        }
+      RegExp exp = new RegExp(r"(jpe?g|png)",caseSensitive: false);
+      final imagePaths =Directory(imagePath).listSync().asMap().values.map((e) => e.path).where((element) => (exp.hasMatch(p.extension(element)))).toList();
+        // final manifestContent = await DefaultAssetBundle.of(context)
+        //     .loadString('AssetManifest.json');
+        //
+        // final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+        // // >> To get paths you need these 2 lines
+        //
+        // final imagePaths = manifestMap.keys
+        //     .where((String key) => key.contains('asserts/'))
+        //     .where((String key) => !key.contains('music'))
+        //     .toList();
+      setState(() {
           hotList = imagePaths;
         });
       } catch (er) {
@@ -158,12 +181,11 @@ class _DrawExampleState extends State<DrawExample> {
   }
 
   Future<File> getImageFileFromAssets(String path) async {
-
     final byteData = await rootBundle.load('$path');
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     file.create(recursive: true).then((val) async {
       if (await val.exists()) {
-        await file.writeAsBytesSync(byteData.buffer
+        file.writeAsBytesSync(byteData.buffer
             .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
       }
     });
@@ -172,7 +194,8 @@ class _DrawExampleState extends State<DrawExample> {
   }
 
   Future<void> getDrawing(img) async {
-    setImageFile(await getImageFileFromAssets(img));
+    setImageFile(File(img));
+    // setImageFile(await getImageFileFromAssets(img));
     final getDraw =
         Navigator.push(context, MaterialPageRoute(builder: (context) {
       return HomePage();

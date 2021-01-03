@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 const Color lime = Color.fromRGBO(240, 203, 148, 1);
 const Color orange = Color.fromRGBO(255, 158, 107, 1);
@@ -35,7 +37,7 @@ class ImageCard extends StatelessWidget {
 
         child: Hero(
             tag: imageInfo,
-            child: Image(image: AssetImage(imageInfo), fit: BoxFit.fitHeight)
+            child: Image.file(File(imageInfo), fit: BoxFit.fitHeight)
         ),
 
       ),
