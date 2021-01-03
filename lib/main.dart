@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_draw/flutter_draw.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:audio_service/audio_service.dart';
 import 'UIHelper.dart';
+import 'package:just_audio/just_audio.dart';
 
 const headerStyle =
     TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold);
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -138,6 +140,13 @@ class _DrawExampleState extends State<DrawExample> {
   }
 
   Future<File> getImageFileFromAssets(String path) async {
+    await AudioService.start(
+      backgroundTaskEntrypoint: _entrypoint,
+      androidNotificationIcon: 'mipmap/ic_launcher',
+      // An example of passing custom parameters.
+      // These will be passed through to your `onStart` callback.
+      // params: {'url', 'https://somewhere.com/sometrack.mp3'},
+    );
     final byteData = await rootBundle.load('$path');
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     file.create(recursive: true).then((val) async {
@@ -164,5 +173,19 @@ class _DrawExampleState extends State<DrawExample> {
     }).catchError((er) {
       print(er);
     });
+  }
+}
+// Must be a top-level function
+void _entrypoint() => AudioServiceBackground.run(() => PodcastBackgroundTask());
+
+
+
+class PodcastBackgroundTask extends BackgroundAudioTask {
+  AudioPlayer _player = AudioPlayer();
+
+  onPlay() {
+    _player.setAsset("asserts/music/2.mp3");
+    _player.play();
+    AudioServiceBackground.setState(playing: true,);
   }
 }
