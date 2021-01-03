@@ -50,6 +50,15 @@ class _DrawExampleState extends State<DrawExample> {
   List<String> hotList;
 
   @override
+  void initState() {
+    super.initState();
+    final assetsAudioPlayer = AssetsAudioPlayer();
+
+    assetsAudioPlayer.open(Audio("asserts/music/2.mp3"),
+        loopMode: LoopMode.playlist);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -139,10 +148,7 @@ class _DrawExampleState extends State<DrawExample> {
   }
 
   Future<File> getImageFileFromAssets(String path) async {
-    final assetsAudioPlayer = AssetsAudioPlayer();
 
-    assetsAudioPlayer.open(Audio("asserts/music/2.mp3"),
-        loopMode: LoopMode.playlist);
     final byteData = await rootBundle.load('$path');
     final file = File('${(await getTemporaryDirectory()).path}/$path');
     file.create(recursive: true).then((val) async {
