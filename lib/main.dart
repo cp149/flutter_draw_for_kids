@@ -96,6 +96,13 @@ class _DrawExampleState extends State<DrawExample> {
               _drawImage != null
                   ? Image.file(_drawImage, fit: BoxFit.fill)
                   : Container(),
+              RaisedButton(
+                onPressed: (){
+                  _initImages(isClear: true);
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                },
+                child: Text("change Directory"),
+              )
             ],
           ),
         ),
@@ -103,44 +110,43 @@ class _DrawExampleState extends State<DrawExample> {
     );
   }
 
-  Widget buildBackImageList() {
-    Future _initImages() async {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        // Try reading data from the counter key. If it doesn't exist, return null.
-        var imagePath = prefs.getString("back_image");
-        final fileExist =await Directory(imagePath).exists();
-        if (imagePath ==null || fileExist==false) {
-          imagePath = await FilesystemPicker.open(
-            title: 'load from folder',
-            context: context,
-            rootDirectory: Directory.current,
-            fsType: FilesystemType.folder,
-            pickText: 'load images from this folder',
-            folderIconColor: Colors.teal,
-          );
-          prefs.setString("back_image",imagePath);
-        }
+  Future _initImages({isClear=false}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Try reading data from the counter key. If it doesn't exist, return null.
+      var imagePath = isClear?"":prefs.getString("back_image")?? "";
+      if (imagePath =="" || await Directory(imagePath).exists()==false) {
+        imagePath = await FilesystemPicker.open(
+          title: 'load from folder',
+          context: context,
+          rootDirectory: await getApplicationDocumentsDirectory(),
+          fsType: FilesystemType.folder,
+          pickText: 'load images from this folder',
+          folderIconColor: Colors.teal,
+        );
+        prefs.setString("back_image",imagePath);
+      }
       RegExp exp = new RegExp(r"(jpe?g|png)",caseSensitive: false);
       final imagePaths =Directory(imagePath).listSync().asMap().values.map((e) => e.path).where((element) => (exp.hasMatch(p.extension(element)))).toList();
-        // final manifestContent = await DefaultAssetBundle.of(context)
-        //     .loadString('AssetManifest.json');
-        //
-        // final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-        // // >> To get paths you need these 2 lines
-        //
-        // final imagePaths = manifestMap.keys
-        //     .where((String key) => key.contains('asserts/'))
-        //     .where((String key) => !key.contains('music'))
-        //     .toList();
+      // final manifestContent = await DefaultAssetBundle.of(context)
+      //     .loadString('AssetManifest.json');
+      //
+      // final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+      // // >> To get paths you need these 2 lines
+      //
+      // final imagePaths = manifestMap.keys
+      //     .where((String key) => key.contains('asserts/'))
+      //     .where((String key) => !key.contains('music'))
+      //     .toList();
       setState(() {
-          hotList = imagePaths;
-        });
-      } catch (er) {
-        print(er);
-      }
+        hotList = imagePaths;
+      });
+    } catch (er) {
+      print(er);
     }
+  }
 
+  Widget buildBackImageList() {
     return FutureBuilder(
       // Initialize FlutterFire:
       future: _initImages(),
