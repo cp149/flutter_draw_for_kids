@@ -23,13 +23,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_draw:
-    path: ../flutter_draw
+
   cached_network_image: ^2.2.0+1
-  assets_audio_player: ^2.0.13
   flutter_audio_desktop: ^0.0.8
+  assets_audio_player: ^2.0.13
   shared_preferences: ^0.5.12+4
   filesystem_picker: ^1.0.3
+  permission_handler: ^5.0.1+1
+  flutter_draw:
+    path: ../flutter_draw
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -46,7 +48,13 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+#  plugin:
+#    platforms:
+#      android:
+#        package: ry.mi.alex.draw_kids
+#        pluginClass: SoundPlugin
+#      ios:
+#        pluginClass: SoundPlugin
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

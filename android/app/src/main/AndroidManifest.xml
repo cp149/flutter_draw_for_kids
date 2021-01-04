@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ry.mi.alex.draw_kids">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
    <application
         android:label="draw_kids"
         android:icon="@mipmap/ic_launcher">

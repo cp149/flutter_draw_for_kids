@@ -1,17 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:draw_kids/ImageCard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_audio_desktop/flutter_audio_desktop.dart';
+
 import 'package:flutter_draw/flutter_draw.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:filesystem_picker/filesystem_picker.dart';
 import 'UIHelper.dart';
 import 'package:path/path.dart' as p;
+// if (Platform.isWindows || Platform.isLinux) {
+import 'package:flutter_audio_desktop/flutter_audio_desktop.dart';
+// }else{
+import 'package:assets_audio_player/assets_audio_player.dart';
+// }
+import 'package:permission_handler/permission_handler.dart';
 
 const headerStyle =
     TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold);
@@ -115,11 +119,16 @@ class _DrawExampleState extends State<DrawExample> {
       final prefs = await SharedPreferences.getInstance();
       // Try reading data from the counter key. If it doesn't exist, return null.
       var imagePath = isClear?"":prefs.getString("back_image")?? "";
+      if (Platform.isAndroid) {
+        if(!await  Permission.storage.request().isGranted){
+            return;
+        }
+      }
       if (imagePath =="" || await Directory(imagePath).exists()==false) {
         imagePath = await FilesystemPicker.open(
           title: 'load from folder',
           context: context,
-          rootDirectory: await getApplicationDocumentsDirectory(),
+          rootDirectory: Platform.isAndroid?Directory('/sdcard'):await getApplicationDocumentsDirectory(),
           fsType: FilesystemType.folder,
           pickText: 'load images from this folder',
           folderIconColor: Colors.teal,
@@ -128,22 +137,26 @@ class _DrawExampleState extends State<DrawExample> {
       }
       RegExp exp = new RegExp(r"(jpe?g|png)",caseSensitive: false);
       final imagePaths =Directory(imagePath).listSync().asMap().values.map((e) => e.path).where((element) => (exp.hasMatch(p.extension(element)))).toList();
-      // final manifestContent = await DefaultAssetBundle.of(context)
-      //     .loadString('AssetManifest.json');
-      //
-      // final Map<String, dynamic> manifestMap = json.decode(manifestContent);
-      // // >> To get paths you need these 2 lines
-      //
-      // final imagePaths = manifestMap.keys
-      //     .where((String key) => key.contains('asserts/'))
-      //     .where((String key) => !key.contains('music'))
-      //     .toList();
+
       setState(() {
         hotList = imagePaths;
       });
     } catch (er) {
       print(er);
     }
+  }
+  Future<List<String>> loadFromAssert() async {
+    final manifestContent = await DefaultAssetBundle.of(context)
+        .loadString('AssetManifest.json');
+
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    // >> To get paths you need these 2 lines
+
+    final imagePaths = manifestMap.keys
+        .where((String key) => key.contains('asserts/'))
+        .where((String key) => !key.contains('music'))
+        .toList();
+    return imagePaths;
   }
 
   Widget buildBackImageList() {
